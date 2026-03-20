@@ -194,10 +194,10 @@ public class Main extends Application {
         });
         scene.setOnMouseClicked(e -> {
             if (gameState == GameState.MENU){
-                if (e.getX() > buttonX && e.getX() < buttonX + buttonWidth && 
-                    e.getY() > buttonY && e.getY < buttonY + buttonHeight){
+                if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH && 
+                    e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT){
                         gameState = GameState.PLAYING;
-                }
+                    }
             }
         });
 
