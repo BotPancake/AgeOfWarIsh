@@ -291,9 +291,20 @@ public class Main extends Application {
 
         drawHUD(gc);
     }
+    // ...MENU GRAPHICS...
     private void renderMenu(GraphicsContext gc){
         gc.setFill(Color.web("#3167e4ff"));
-        gc.fillRect(0, GROUND_Y, WIDTH, HEIGHT - GROUND_Y);
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
+        gc.fillText("Age of Warish", WIDTH / 2.0 -180, HEIGHT / 2.0 - 80);
+
+        gc.setFill(Color.DARKGRAY);
+        gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+        gc.fillText("New Game", BUTTON_X, + 40, BUTTON_Y + 32);
 
     }
 
