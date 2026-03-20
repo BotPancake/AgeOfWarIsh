@@ -163,6 +163,12 @@ public class Main extends Application {
             }
         }
     }
+    // ... ARCHER ...
+    static class Archer extends Unit{
+        Archer(double x, double y, boolean isPlayer){
+            super(x, y, isPlayer)
+        }
+    }
 
     // ---------------------------------------------------------------
     // Game state
