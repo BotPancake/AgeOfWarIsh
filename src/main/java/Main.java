@@ -31,6 +31,7 @@ public class Main extends Application {
 
     // --- Unit config ---
     static final int  UNIT_SIZE         = 28;
+    static final int ARCHER_UNIT_SIZE = 24;
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
     // ...Meny... 
@@ -166,8 +167,27 @@ public class Main extends Application {
     // ... ARCHER ...
     static class Archer extends Unit{
         Archer(double x, double y, boolean isPlayer){
-            super(x, y, isPlayer)
+            super(x, y, isPlayer);
+            this.speed = 60.0;
         }
+        @Override
+        void draw(GraphicsContext gc){
+            Color body = isPlayer ? Color.CYAN : Color.ORANGE;
+            Color outline = isPlayer ? Color.CYAN : Color.ORANGE;
+        }
+
+        //Body
+        gc.setFill(body);
+        gc.fillRect(x, y - ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE);
+        gc.setStroke(outline);
+        gc.setLineWidth(2);
+        gc.strokeRect(x, y - ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE);
+
+        //Head
+        double HeadR = ARCHER_UNIT_SIZE * 0.35;
+        double HeadX = x + ARCHER_UNIT_SIZE / 2.0 - HeadR;
+        double HeadY = y - ARCHER_UNIT_SIZE- HeadR * 2 - 2;
+        gc.setFill()
     }
 
     // ---------------------------------------------------------------
