@@ -9,6 +9,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+// ...Brukes for å få riktig tekstplassering på menyen ...
+import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -302,9 +304,25 @@ public class Main extends Application {
 
         gc.setFill(Color.DARKGRAY);
         gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
-        gc.setFill(Color.WHITE);
+
+        String label = "New Game";
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-        gc.fillText("New Game", BUTTON_X, + 40, BUTTON_Y + 32);
+
+        Text helper = new Text(label);
+        helper.setFont(gc.getFont());
+        double textWidth = helper.getLayoutBounds().getWidth();
+        double textHeight = helper.getLayoutBounds().getHeight();
+
+        gc.setFill(Color.WHITE);
+        gc.fillText(label,
+            BUTTON_X + (BUTTON_WIDTH - textWidth) / 2,
+            BUTTON_Y + (BUTTON_HEIGHT + textHeight) / 2 - 4
+        );
+
+
+        
+
+        
 
     }
 
