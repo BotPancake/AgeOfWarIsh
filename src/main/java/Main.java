@@ -291,7 +291,7 @@ public class Main extends Application {
         drawHUD(gc);
     }
     private void renderMenu(GraphicsContext gc){
-        
+        g
     }
 
     private void drawBase(GraphicsContext gc, int x, int y, boolean isPlayer) {
