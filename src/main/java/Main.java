@@ -195,8 +195,8 @@ public class Main extends Application {
         scene.setOnMouseClicked(e -> {
             if (gameState == GameState.MENU){
                 if (e.getX() > buttonX && e.getX() < buttonX + buttonWidth && 
-                e.getY() > buttonY && e.getY < buttonY + buttonHeight){
-                    gameState = GameState.PLAYING;
+                    e.getY() > buttonY && e.getY < buttonY + buttonHeight){
+                        gameState = GameState.PLAYING;
                 }
             }
         });
@@ -268,7 +268,8 @@ public class Main extends Application {
             renderMenu(gc);
         } else {
             renderGame(gc);
-    }
+        }
+    };
     private void renderGame(GraphicsContext gc){
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
@@ -291,7 +292,9 @@ public class Main extends Application {
         drawHUD(gc);
     }
     private void renderMenu(GraphicsContext gc){
-        g
+        gc.setFill(Color.web("#3167e4ff"));
+        gc.fillRect(0, GROUND_Y, WIDTH, HEIGHT - GROUND_Y);
+
     }
 
     private void drawBase(GraphicsContext gc, int x, int y, boolean isPlayer) {
