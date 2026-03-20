@@ -42,7 +42,7 @@ public class Main extends Application {
     static final int BUTTON_Y = HEIGHT / 2;
     static final int BUTTON_WIDTH = 200;
     static final int BUTTON_HEIGHT = 50;
-    
+    static final int BUTTON_GAP = 20;
 
     
 
@@ -308,6 +308,11 @@ public class Main extends Application {
         String label = "New Game";
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
+        gc.setFill(Color.GRAY);
+        gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 20, 10);
+
+        
+
         Text helper = new Text(label);
         helper.setFont(gc.getFont());
         double textWidth = helper.getLayoutBounds().getWidth();
@@ -317,6 +322,20 @@ public class Main extends Application {
         gc.fillText(label,
             BUTTON_X + (BUTTON_WIDTH - textWidth) / 2,
             BUTTON_Y + (BUTTON_HEIGHT + textHeight) / 2 - 4
+        );
+
+        String label1 = "Continue";
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
+
+        Text helper1 = new Text(label1);
+        helper1.setFont(gc.getFont());
+        double textWidth1 = helper1.getLayoutBounds().getWidth();
+        double textHeight1 = helper1.getLayoutBounds().getHeight();
+
+        gc.setFill(Color.WHITE);
+        gc.fillText(label1,
+            BUTTON_X + (BUTTON_WIDTH - textWidth1) / 2,
+            BUTTON_Y + BUTTON_HEIGHT + BUTTON_GAP + (BUTTON_HEIGHT + textHeight1) / 2 - 4
         );
 
 
