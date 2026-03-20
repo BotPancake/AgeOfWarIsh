@@ -31,6 +31,20 @@ public class Main extends Application {
     static final int  UNIT_SIZE         = 28;
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
+    // ...Menu... 
+    enum GameState {MENU, PLAYING}
+    private GameState gameState = GameState.MENU;
+
+    
+    static final int BUTTON_X = WIDTH / 2 -100;
+    static final int BUTTON_Y = HEIGHT / 2;
+    static final int BUTTON_WIDTH = 200;
+    static final int BUTTON_HEIGHT = 50;
+    
+
+    
+
+
     // ---------------------------------------------------------------
     // Abstract Unit base class
     // ---------------------------------------------------------------
@@ -178,6 +192,14 @@ public class Main extends Application {
         scene.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.SPACE) spawnKeyHeld = false;
         });
+        scene.setOnMouseClicked(e -> {
+            if (gameState == GameState.MENU){
+                if (e.getX() > buttonX && e.getX() < buttonX + buttonWidth && 
+                e.getY() > buttonY && e.getY < buttonY + buttonHeight){
+                    gameState = GameState.PLAYING;
+                }
+            }
+        });
 
         AnimationTimer timer = new AnimationTimer() {
             private long lastTime = 0;
@@ -193,7 +215,7 @@ public class Main extends Application {
         };
         timer.start();
 
-        stage.setTitle("Age of War");
+        stage.setTitle("Age of Warish");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
@@ -204,6 +226,7 @@ public class Main extends Application {
     // Update
     // ---------------------------------------------------------------
     private void update(long now, double delta) {
+        if (gameState == GameState.PLAYING){
         if (spawnKeyHeld && (now - lastPlayerSpawn) >= SPAWN_COOLDOWN_NS) {
             spawnUnit(true);
             lastPlayerSpawn = now;
@@ -222,7 +245,7 @@ public class Main extends Application {
                 else            enemyScore++;
                 it.remove();
             }
-        }
+        }}
     }
 
     private void spawnUnit(boolean isPlayer) {
@@ -240,6 +263,13 @@ public class Main extends Application {
     // Render
     // ---------------------------------------------------------------
     private void render(GraphicsContext gc) {
+
+        if (gameState == GameState.MENU) {
+            renderMenu(gc);
+        } else {
+            renderGame(gc);
+    }
+    private void renderGame(GraphicsContext gc){
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -259,6 +289,9 @@ public class Main extends Application {
         for (Unit u : units) u.draw(gc);
 
         drawHUD(gc);
+    }
+    private void renderMenu(GraphicsContext gc){
+        
     }
 
     private void drawBase(GraphicsContext gc, int x, int y, boolean isPlayer) {
