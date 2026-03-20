@@ -33,7 +33,7 @@ public class Main extends Application {
     static final int  UNIT_SIZE         = 28;
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
-    // ...Menu... 
+    // ...Meny... 
     enum GameState {MENU, PLAYING}
     private GameState gameState = GameState.MENU;
 
