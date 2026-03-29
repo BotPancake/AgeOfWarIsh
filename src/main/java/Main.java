@@ -173,8 +173,8 @@ public class Main extends Application {
         @Override
         void draw(GraphicsContext gc){
             Color body = isPlayer ? Color.CYAN : Color.ORANGE;
-            Color outline = isPlayer ? Color.CYAN : Color.ORANGE;
-        }
+            Color outline = isPlayer ? Color.DARKCYAN : Color.DARKORANGE;
+        
 
         //Body
         gc.setFill(body);
@@ -184,10 +184,13 @@ public class Main extends Application {
         gc.strokeRect(x, y - ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE);
 
         //Head
-        double HeadR = ARCHER_UNIT_SIZE * 0.35;
-        double HeadX = x + ARCHER_UNIT_SIZE / 2.0 - HeadR;
-        double HeadY = y - ARCHER_UNIT_SIZE- HeadR * 2 - 2;
-        gc.setFill()
+        double headR = ARCHER_UNIT_SIZE * 0.35;
+        double headX = x + ARCHER_UNIT_SIZE / 2.0 - headR;
+        double headY = y - ARCHER_UNIT_SIZE- headR * 2 - 2;
+        gc.setFill(body.brigther());
+        gc.fillOval(headX, headY, headR * 2, headR * 2);
+        gc.strokeOval(headX, headY, headR * 2, headR * 2);
+        }
     }
 
     // ---------------------------------------------------------------
@@ -281,9 +284,13 @@ public class Main extends Application {
                 ? LEFT_BASE_X + BASE_WIDTH + 4
                 : RIGHT_BASE_X - UNIT_SIZE - 4;
 
+        double roll = Math.random();
         Unit u = Math.random() < 0.5
                 ? new Soldier(spawnX, GROUND_Y, isPlayer)
-                : new Knight(spawnX, GROUND_Y, isPlayer);
+                : roll < 0.66
+                ? new Knight(spawnX, GROUND_Y, isPlayer);
+                : new Archer(spawnX, GROUND_Y, isPlayer);
+
         units.add(u);
     }
 
@@ -297,7 +304,7 @@ public class Main extends Application {
         } else {
             renderGame(gc);
         }
-    };
+    }
     private void renderGame(GraphicsContext gc){
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
