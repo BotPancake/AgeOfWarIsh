@@ -187,7 +187,7 @@ public class Main extends Application {
         double headR = ARCHER_UNIT_SIZE * 0.35;
         double headX = x + ARCHER_UNIT_SIZE / 2.0 - headR;
         double headY = y - ARCHER_UNIT_SIZE- headR * 2 - 2;
-        gc.setFill(body.brigther());
+        gc.setFill(body.brighter());
         gc.fillOval(headX, headY, headR * 2, headR * 2);
         gc.strokeOval(headX, headY, headR * 2, headR * 2);
         }
@@ -223,10 +223,13 @@ public class Main extends Application {
         scene.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.SPACE) spawnKeyHeld = false;
         });
-        scene.setOnMouseClicked(e -> {
+        canvas.setOnMouseClicked(e -> {
+            System.out.println("Clicked at: " + e.getX() + ", " + e.getY());
+            System.out.println("Game State: " + gameState);
             if (gameState == GameState.MENU){
                 if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH && 
                     e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT){
+                        System.out.println("Button Clicked! ");
                         gameState = GameState.PLAYING;
                     }
             }
@@ -288,7 +291,7 @@ public class Main extends Application {
         Unit u = Math.random() < 0.5
                 ? new Soldier(spawnX, GROUND_Y, isPlayer)
                 : roll < 0.66
-                ? new Knight(spawnX, GROUND_Y, isPlayer);
+                ? new Knight(spawnX, GROUND_Y, isPlayer)
                 : new Archer(spawnX, GROUND_Y, isPlayer);
 
         units.add(u);
@@ -328,23 +331,22 @@ public class Main extends Application {
     }
     // ...MENU GRAPHICS...
     private void renderMenu(GraphicsContext gc){
+
+        // ...Bakgrunn...
         gc.setFill(Color.web("#3167e4ff"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
 
+        // ... Tittel...
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
         gc.fillText("Age of Warish", WIDTH / 2.0 -180, HEIGHT / 2.0 - 80);
 
+        // ...Nytt spill knapp...
         gc.setFill(Color.DARKGRAY);
         gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
 
         String label = "New Game";
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-
-        gc.setFill(Color.GRAY);
-        gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 20, 10);
-
-        
 
         Text helper = new Text(label);
         helper.setFont(gc.getFont());
@@ -356,6 +358,11 @@ public class Main extends Application {
             BUTTON_X + (BUTTON_WIDTH - textWidth) / 2,
             BUTTON_Y + (BUTTON_HEIGHT + textHeight) / 2 - 4
         );
+
+
+        // ...Fortsett knapp...
+        gc.setFill(Color.GRAY);
+        gc.fillRoundRect(BUTTON_X, BUTTON_Y + BUTTON_HEIGHT + BUTTON_GAP, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
 
         String label1 = "Continue";
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
@@ -379,6 +386,65 @@ public class Main extends Application {
     }
 
     private void drawBase(GraphicsContext gc, int x, int y, boolean isPlayer) {
+
+    // --- Colours ---
+    Color stone     = Color.web("#8B7355");
+    Color darkStone = Color.web("#5C4033");
+    Color wood      = Color.web("#8B4513");
+
+    // Main wall — rough stone colour
+    gc.setFill(stone);
+    gc.fillRect(x, y, BASE_WIDTH, BASE_HEIGHT);
+    gc.setStroke(darkStone);
+    gc.setLineWidth(2);
+    gc.strokeRect(x, y, BASE_WIDTH, BASE_HEIGHT);
+
+    // Stone texture — a few rough lines across the wall
+    gc.setStroke(darkStone);
+    gc.setLineWidth(1);
+    gc.strokeLine(x + 10, y + 30, x + BASE_WIDTH - 10, y + 30);
+    gc.strokeLine(x + 5,  y + 60, x + BASE_WIDTH - 5,  y + 60);
+    gc.strokeLine(x + 10, y + 90, x + BASE_WIDTH - 10, y + 90);
+
+    // Wooden stakes on top instead of battlements
+    gc.setFill(wood);
+    for (int i = 0; i < 5; i++) {
+        int stakeX = x + 8 + i * 16;
+        // Stake body
+        gc.fillRect(stakeX, y - 20, 8, 22);
+        // Pointy tip using a triangle
+        gc.fillPolygon(
+            new double[]{stakeX, stakeX + 4, stakeX + 8},
+            new double[]{y - 20, y - 32,     y - 20}, 3
+        );
+    }
+
+    // Cave entrance instead of a door
+    gc.setFill(Color.web("#2b1a0e"));
+    gc.fillOval(x + BASE_WIDTH / 2 - 14, y + BASE_HEIGHT - 40, 28, 38);
+
+    // Flag pole — a crooked stick
+    int poleX = isPlayer ? x + BASE_WIDTH - 8 : x + 8;
+    gc.setStroke(wood);
+    gc.setLineWidth(3);
+    gc.strokeLine(poleX, y - 20, poleX + 3, y - 50);
+
+    // Bone flag — two circles and a rectangle
+    int flagDir = isPlayer ? -1 : 1;
+    gc.setFill(Color.web("#F5F5DC"));
+    gc.fillOval(poleX + flagDir * 2,        y - 54, 10, 8);  // top knob
+    gc.fillOval(poleX + flagDir * 2,        y - 38, 10, 8);  // bottom knob
+    gc.fillRect(poleX + flagDir * 4,        y - 50, 5, 16);  // bone shaft
+
+    // Label
+    gc.setFill(Color.web("#F5F5DC"));
+    gc.setFont(Font.font("Arial", FontWeight.BOLD, 11));
+    String label = isPlayer ? "YOUR BASE" : "ENEMY BASE";
+    gc.fillText(label, x + (isPlayer ? 4 : 2), y - 58);
+}
+
+/* 
+
         Color wall = isPlayer ? Color.STEELBLUE      : Color.FIREBRICK;
         Color roof = isPlayer ? Color.DARKBLUE        : Color.DARKRED;
         Color door = isPlayer ? Color.web("#1a3a5c")  : Color.web("#5c1a1a");
@@ -404,6 +470,9 @@ public class Main extends Application {
         gc.fillRoundRect(dx, dy, dw, dh, 8, 8);
 
         gc.setFill(Color.web("#fffbe6"));
+
+
+        // ...!!!...
         gc.fillRect(x + BASE_WIDTH / 2 - 8, y + BASE_HEIGHT / 4, 16, 16);
         gc.setStroke(roof);
         gc.strokeRect(x + BASE_WIDTH / 2 - 8, y + BASE_HEIGHT / 4, 16, 16);
@@ -430,7 +499,7 @@ public class Main extends Application {
         String label = isPlayer ? "YOUR BASE" : "ENEMY BASE";
         gc.fillText(label, x + (isPlayer ? 4 : 2), y - 58);
     }
-
+*/
     private void drawHUD(GraphicsContext gc) {
         gc.setFill(Color.color(0, 0, 0, 0.55));
         gc.fillRect(0, 0, WIDTH, 44);
