@@ -45,7 +45,7 @@ public class Main extends Application {
     static final int BUTTON_HEIGHT = 50;
     static final int BUTTON_GAP = 20;
 
-    static final int MAX_HEALTH = 100;
+    static final int MAX_HEALTH = 25;
 
     
 
@@ -313,6 +313,32 @@ public class Main extends Application {
             renderGame(gc);
         }
     }
+    private void drawHealthBar(GraphicsContext gc, int x, int health){
+        int barWidth = 120;
+        int barHeight = 14;
+        int barY = GROUND_Y - BASE_HEIGHT - 30;
+
+        // ...Bakgrunn...
+        gc.setFill(Color.web("#3a3a3a"));
+        gc.fillRect(x, barY, barWidth, barHeight);
+
+        // ...Rødt...
+        double fillWidth = ((double) health / MAX_HEALTH) * barWidth;
+        gc.setFill(Color.LIMEGREEN);
+        gc.fillRect(x, barY, fillWidth, barHeight);
+
+        // ...Border...
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokeRect(x, barY, barWidth, barHeight);
+
+        // ...Liv...
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+        gc.fillText(health + "/" + MAX_HEALTH, x + 30, barY + 11);
+    }
+
+
     private void renderGame(GraphicsContext gc){
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
@@ -329,6 +355,9 @@ public class Main extends Application {
 
         drawBase(gc, LEFT_BASE_X,  GROUND_Y - BASE_HEIGHT, true);
         drawBase(gc, RIGHT_BASE_X, GROUND_Y - BASE_HEIGHT, false);
+
+        drawHealthBar(gc, LEFT_BASE_X, playerHealth);
+        drawHealthBar(gc, RIGHT_BASE_X, enemyHealth);
 
         for (Unit u : units) u.draw(gc);
 
