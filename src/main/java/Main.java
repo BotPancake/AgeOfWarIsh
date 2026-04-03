@@ -35,7 +35,7 @@ public class Main extends Application {
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
     // ...Meny... 
-    enum GameState {MENU, PLAYING}
+    enum GameState {MENU, PLAYING, GAME_OVER}
     private GameState gameState = GameState.MENU;
 
     
@@ -275,6 +275,8 @@ public class Main extends Application {
             lastEnemySpawn = now;
         }
 
+        // ---Here?----
+
         Iterator<Unit> it = units.iterator();
         while (it.hasNext()) {
             Unit u = it.next();
@@ -285,6 +287,10 @@ public class Main extends Application {
                 it.remove();
             }
         }}
+        // ...Game over...
+        if(playerHealth <= 0 || enemyHealth <= 0){
+            gameState = GameState.GAME_OVER;
+        }
     }
 
     private void spawnUnit(boolean isPlayer) {
@@ -309,9 +315,12 @@ public class Main extends Application {
 
         if (gameState == GameState.MENU) {
             renderMenu(gc);
-        } else {
+        } else if (gameState == GameState.PLAYING) {
             renderGame(gc);
+        } else if (gameState == GameState.GAME_OVER){
+            renderGameOver(gc);
         }
+            
     }
     private void drawHealthBar(GraphicsContext gc, int x, int health){
         int barWidth = 120;
@@ -553,6 +562,30 @@ public class Main extends Application {
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
         gc.fillText("Hold [SPACE] to spawn a unit", WIDTH / 2.0 - 95, 28);
+    }
+    // ...GAME OVER GRAFIKK...
+    private void renderGameOver(GraphicsContext gc){
+
+        gc.setFill(Color.web("#000000ff"));
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.setFill(Color.RED);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
+        gc.fillText("GAME OVER", WIDTH / 2.0 - 180, HEIGHT / 2.0 - 60);
+
+        
+        String result = playerHealth <= 0 ? "You Lose!" : "You Win!";
+        Text helper2 = new Text(result);
+        helper2.setFont(gc.getFont());
+        double textWidth2 = helper2.getLayoutBounds().getWidth();
+        double textHeight2 = helper2.getLayoutBounds().getHeight();
+
+        // ... Tittel...
+        gc.setFill(Color.RED);
+        gc.fillText(result,
+            WIDTH / 2.0 - textWidth2 / 2,
+            HEIGHT / 2.0 + textHeight2 / 2
+        );
     }
 
     // ---------------------------------------------------------------
