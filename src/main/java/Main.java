@@ -45,6 +45,8 @@ public class Main extends Application {
     static final int BUTTON_HEIGHT = 50;
     static final int BUTTON_GAP = 20;
 
+    static final int MAX_HEALTH = 100;
+
     
 
 
@@ -204,6 +206,9 @@ public class Main extends Application {
     private int playerScore = 0;
     private int enemyScore  = 0;
 
+    private int playerHealth = MAX_HEALTH;
+    private int enemyHealth = MAX_HEALTH;
+
     private boolean spawnKeyHeld = false;
 
     // ---------------------------------------------------------------
@@ -275,8 +280,8 @@ public class Main extends Application {
             Unit u = it.next();
             u.update(delta);
             if (u.hasReachedEnemyBase()) {
-                if (u.isPlayer) playerScore++;
-                else            enemyScore++;
+                if (u.isPlayer) enemyHealth--;
+                else            playerHealth--;
                 it.remove();
             }
         }}
