@@ -47,6 +47,9 @@ public class Main extends Application {
 
     static final int MAX_HEALTH = 25;
 
+    // ...La inn enemyHealth for å sjekke om Game Over Teksten endres om spiller vinner eller taper...
+    static final int MAX_ENEMY_HEALTH = 25;
+
     
 
 
@@ -207,7 +210,7 @@ public class Main extends Application {
     private int enemyScore  = 0;
 
     private int playerHealth = MAX_HEALTH;
-    private int enemyHealth = MAX_HEALTH;
+    private int enemyHealth = MAX_ENEMY_HEALTH;
 
     private boolean spawnKeyHeld = false;
 
