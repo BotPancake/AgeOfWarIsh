@@ -34,16 +34,23 @@ public class Main extends Application {
     static final int ARCHER_UNIT_SIZE = 24;
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
+    // ...Meny...
+    enum GameState {MENU, PLAYING}
     // ...Meny... 
     enum GameState {MENU, PLAYING, GAME_OVER}
     private GameState gameState = GameState.MENU;
 
-    
+
     static final int BUTTON_X = WIDTH / 2 -100;
     static final int BUTTON_Y = HEIGHT / 2;
     static final int BUTTON_WIDTH = 200;
     static final int BUTTON_HEIGHT = 50;
     static final int BUTTON_GAP = 20;
+
+    static final long SOLDIER_COOLDOWN_NS = 1_750_000_000L;  // 1.75 second
+    static final long ARCHER_COOLDOWN_NS  = 2_500_000_000L;  // 2.5 seconds
+    static final long KNIGHT_COOLDOWN_NS  = 5_000_000_000L;  // 5 seconds
+
 
     static final int MAX_HEALTH = 25;
 
@@ -170,6 +177,10 @@ public class Main extends Application {
         }
     }
     // ... ARCHER ...
+    static class Archer extends Unit {
+        Archer(double x, double y, boolean isPlayer) {
+            super(x, y, isPlayer);
+            this.speed = 50.0;
     static class Archer extends Unit{
         Archer(double x, double y, boolean isPlayer){
             super(x, y, isPlayer);
@@ -196,19 +207,43 @@ public class Main extends Application {
         gc.fillOval(headX, headY, headR * 2, headR * 2);
         gc.strokeOval(headX, headY, headR * 2, headR * 2);
         }
-    }
 
+        @Override
+        void draw(GraphicsContext gc) {
+            Color body    = isPlayer ? Color.CORNFLOWERBLUE : Color.TOMATO;
+            Color outline = isPlayer ? Color.DARKBLUE       : Color.DARKRED;
+
+            gc.setFill(body);
+            gc.fillRect(x, y - UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
+            gc.setStroke(outline);
+            gc.setLineWidth(2);
+            gc.strokeRect(x, y - UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
+
+            double headR = UNIT_SIZE * 0.35;
+            double headX = x + UNIT_SIZE / 2.0 - headR;
+            double headY = y - UNIT_SIZE - headR * 2 - 2;
+            gc.setFill(body.brighter());
+            gc.fillOval(headX, headY, headR * 2, headR * 2);
+            gc.strokeOval(headX, headY, headR * 2, headR * 2);
+        }
+    }
     // ---------------------------------------------------------------
     // Game state
     // ---------------------------------------------------------------
     private final List<Unit> units = new ArrayList<>();
 
     private long lastPlayerSpawn = 0;
+    private long lastSoldierSpawn = 0;
+    private long lastArcherSpawn  = 0;
+    private long lastKnightSpawn  = 0;
     private long lastEnemySpawn  = 0;
 
     private int playerScore = 0;
     private int enemyScore  = 0;
 
+    private boolean spawnSoldier = false;
+    private boolean spawnArcher  = false;
+    private boolean spawnKnight  = false;
     private int playerHealth = MAX_HEALTH;
     private int enemyHealth = MAX_ENEMY_HEALTH;
 
@@ -226,11 +261,21 @@ public class Main extends Application {
         Scene scene = new Scene(root, WIDTH, HEIGHT);
 
         scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.SPACE) spawnKeyHeld = true;
+            if (e.getCode() == KeyCode.Q) spawnSoldier = true;
+            if (e.getCode() == KeyCode.W) spawnArcher  = true;
+            if (e.getCode() == KeyCode.E) spawnKnight  = true;
         });
         scene.setOnKeyReleased(e -> {
-            if (e.getCode() == KeyCode.SPACE) spawnKeyHeld = false;
+            if (e.getCode() == KeyCode.Q) spawnSoldier = false;
+            if (e.getCode() == KeyCode.W) spawnArcher  = false;
+            if (e.getCode() == KeyCode.E) spawnKnight  = false;
         });
+        scene.setOnMouseClicked(e -> {          // <-- ADD THIS
+            if (gameState == GameState.MENU) {
+                if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH &&
+                        e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT) {
+                    gameState = GameState.PLAYING;
+                }
         canvas.setOnMouseClicked(e -> {
             System.out.println("Clicked at: " + e.getX() + ", " + e.getY());
             System.out.println("Game State: " + gameState);
@@ -268,16 +313,38 @@ public class Main extends Application {
     // Update
     // ---------------------------------------------------------------
     private void update(long now, double delta) {
-        if (gameState == GameState.PLAYING){
-        if (spawnKeyHeld && (now - lastPlayerSpawn) >= SPAWN_COOLDOWN_NS) {
-            spawnUnit(true);
-            lastPlayerSpawn = now;
-        }
-        if ((now - lastEnemySpawn) >= SPAWN_COOLDOWN_NS) {
-            spawnUnit(false);
-            lastEnemySpawn = now;
-        }
+        if (gameState == GameState.PLAYING) {
 
+            if ((now - lastSoldierSpawn) >= SOLDIER_COOLDOWN_NS) {
+                if (spawnSoldier) {
+                    spawnUnit(true, "soldier");
+                    lastSoldierSpawn = now;
+                }
+            }
+            if ((now - lastArcherSpawn) >= ARCHER_COOLDOWN_NS) {
+                if (spawnArcher) {
+                    spawnUnit(true, "archer");
+                    lastArcherSpawn = now;
+                }
+            }
+            if ((now - lastKnightSpawn) >= KNIGHT_COOLDOWN_NS) {
+                if (spawnKnight) {
+                    spawnUnit(true, "knight");
+                    lastKnightSpawn = now;
+                }
+            }
+
+            Iterator<Unit> it = units.iterator();
+            while (it.hasNext()) {
+                Unit u = it.next();
+                u.update(delta);
+                if (u.hasReachedEnemyBase()) {
+                    if (u.isPlayer) playerScore++;
+                    else            enemyScore++;
+                    it.remove();
+                }
+            }
+        } // <-- this brace now correctly closes the PLAYING block
 
         Iterator<Unit> it = units.iterator();
         while (it.hasNext()) {
@@ -295,11 +362,16 @@ public class Main extends Application {
         }
     }
 
-    private void spawnUnit(boolean isPlayer) {
+    private void spawnUnit(boolean isPlayer, String type) {
         double spawnX = isPlayer
                 ? LEFT_BASE_X + BASE_WIDTH + 4
                 : RIGHT_BASE_X - UNIT_SIZE - 4;
 
+        Unit u = switch (type) {
+            case "archer" -> new Archer(spawnX, GROUND_Y, isPlayer);
+            case "knight" -> new Knight(spawnX, GROUND_Y, isPlayer);
+            default       -> new Soldier(spawnX, GROUND_Y, isPlayer);
+        };
         double roll = Math.random();
         Unit u = Math.random() < 0.5
                 ? new Soldier(spawnX, GROUND_Y, isPlayer)
@@ -393,6 +465,12 @@ public class Main extends Application {
         String label = "New Game";
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
+        gc.setFill(Color.GRAY);
+        gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 20, 10);
+
+
+
+
         Text helper = new Text(label);
         helper.setFont(gc.getFont());
         double textWidth = helper.getLayoutBounds().getWidth();
@@ -424,9 +502,9 @@ public class Main extends Application {
         );
 
 
-        
 
-        
+
+
 
     }
 
@@ -564,7 +642,7 @@ public class Main extends Application {
 
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("Hold [SPACE] to spawn a unit", WIDTH / 2.0 - 95, 28);
+        gc.fillText("Q: Soldier  W: Archer  E: Knight", WIDTH / 2.0 - 95, 28);
     }
     // ...GAME OVER GRAFIKK...
     private void renderGameOver(GraphicsContext gc){
