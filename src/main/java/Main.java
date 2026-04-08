@@ -278,7 +278,6 @@ public class Main extends Application {
             lastEnemySpawn = now;
         }
 
-        // ---Here?----
 
         Iterator<Unit> it = units.iterator();
         while (it.hasNext()) {
@@ -490,7 +489,8 @@ public class Main extends Application {
 }
 
 /* 
-
+        ...Kode for middelalder utseende...
+        
         Color wall = isPlayer ? Color.STEELBLUE      : Color.FIREBRICK;
         Color roof = isPlayer ? Color.DARKBLUE        : Color.DARKRED;
         Color door = isPlayer ? Color.web("#1a3a5c")  : Color.web("#5c1a1a");
