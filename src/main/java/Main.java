@@ -31,6 +31,7 @@ public class Main extends Application {
     // --- Unit config ---
     static final int  UNIT_SIZE        = 28;
     static final int  ARCHER_UNIT_SIZE = 24;
+    
 
     // --- Spawn cooldowns ---
     static final long SOLDIER_COOLDOWN_NS = 1_750_000_000L;
@@ -59,6 +60,10 @@ public class Main extends Application {
         double x, y;
         boolean isPlayer;
         double speed;
+        double maxHealth;
+        double health;
+        double damage;
+        boolean fighting;
 
         Unit(double x, double y, boolean isPlayer) {
             this.x = x;
@@ -68,8 +73,12 @@ public class Main extends Application {
 
         abstract void draw(GraphicsContext gc);
 
+        
+
         void update(double deltaSeconds) {
-            x += (isPlayer ? 1 : -1) * speed * deltaSeconds;
+            if(!fighting){
+                x += (isPlayer ? 1 : -1) * speed * deltaSeconds;
+            }
         }
 
         boolean hasReachedEnemyBase() {
@@ -85,6 +94,9 @@ public class Main extends Application {
         Soldier(double x, double y, boolean isPlayer) {
             super(x, y, isPlayer);
             this.speed = 60.0;
+            this.health = 30.0;
+            this.maxHealth = 30.0;
+            this.health = 10.0;
         }
 
         @Override
@@ -129,6 +141,9 @@ public class Main extends Application {
         Knight(double x, double y, boolean isPlayer) {
             super(x, y, isPlayer);
             this.speed = 35.0;
+            this.health = 80.0;
+            this.maxHealth = 80.0;
+            this.damage = 15.0;
         }
 
         @Override
@@ -170,6 +185,9 @@ public class Main extends Application {
         Archer(double x, double y, boolean isPlayer) {
             super(x, y, isPlayer);
             this.speed = 50.0;
+            this.health = 20.0;
+            this.maxHealth = 20.0;
+            this.damage = 8.0;
         }
 
         @Override
@@ -324,6 +342,20 @@ public class Main extends Application {
                     it.remove();
                 }
             }
+            for (Unit u : units){
+                u.fighting = false;
+                for (Unit other : units){
+                    if (other.isPlayer != u.isPlayer){
+                        double distance = Math.abs(u.x - other.x);
+                        if (distance < 40){
+                            u.fighting = true;
+                            other.health -= u.damage * delta;
+                        }
+
+                    }
+                }
+            }
+            
 
             // Check for game over
             if (playerHealth <= 0 || enemyHealth <= 0) {
