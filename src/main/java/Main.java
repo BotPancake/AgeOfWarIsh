@@ -31,10 +31,13 @@ public class Main extends Application {
 
     // --- Unit config ---
     static final int  UNIT_SIZE         = 28;
+    static final int ARCHER_UNIT_SIZE = 24;
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
     // ...Meny...
     enum GameState {MENU, PLAYING}
+    // ...Meny... 
+    enum GameState {MENU, PLAYING, GAME_OVER}
     private GameState gameState = GameState.MENU;
 
 
@@ -49,6 +52,12 @@ public class Main extends Application {
     static final long KNIGHT_COOLDOWN_NS  = 5_000_000_000L;  // 5 seconds
 
 
+    static final int MAX_HEALTH = 25;
+
+    // ...La inn enemyHealth for å sjekke om Game Over Teksten endres om spiller vinner eller taper...
+    static final int MAX_ENEMY_HEALTH = 25;
+
+    
 
 
     // ---------------------------------------------------------------
@@ -172,6 +181,31 @@ public class Main extends Application {
         Archer(double x, double y, boolean isPlayer) {
             super(x, y, isPlayer);
             this.speed = 50.0;
+    static class Archer extends Unit{
+        Archer(double x, double y, boolean isPlayer){
+            super(x, y, isPlayer);
+            this.speed = 60.0;
+        }
+        @Override
+        void draw(GraphicsContext gc){
+            Color body = isPlayer ? Color.CYAN : Color.ORANGE;
+            Color outline = isPlayer ? Color.DARKCYAN : Color.DARKORANGE;
+        
+
+        //Body
+        gc.setFill(body);
+        gc.fillRect(x, y - ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE);
+        gc.setStroke(outline);
+        gc.setLineWidth(2);
+        gc.strokeRect(x, y - ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE, ARCHER_UNIT_SIZE);
+
+        //Head
+        double headR = ARCHER_UNIT_SIZE * 0.35;
+        double headX = x + ARCHER_UNIT_SIZE / 2.0 - headR;
+        double headY = y - ARCHER_UNIT_SIZE- headR * 2 - 2;
+        gc.setFill(body.brighter());
+        gc.fillOval(headX, headY, headR * 2, headR * 2);
+        gc.strokeOval(headX, headY, headR * 2, headR * 2);
         }
 
         @Override
@@ -210,6 +244,10 @@ public class Main extends Application {
     private boolean spawnSoldier = false;
     private boolean spawnArcher  = false;
     private boolean spawnKnight  = false;
+    private int playerHealth = MAX_HEALTH;
+    private int enemyHealth = MAX_ENEMY_HEALTH;
+
+    private boolean spawnKeyHeld = false;
 
     // ---------------------------------------------------------------
     // JavaFX entry point
@@ -238,6 +276,15 @@ public class Main extends Application {
                         e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT) {
                     gameState = GameState.PLAYING;
                 }
+        canvas.setOnMouseClicked(e -> {
+            System.out.println("Clicked at: " + e.getX() + ", " + e.getY());
+            System.out.println("Game State: " + gameState);
+            if (gameState == GameState.MENU){
+                if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH && 
+                    e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT){
+                        System.out.println("Button Clicked! ");
+                        gameState = GameState.PLAYING;
+                    }
             }
         });
 
@@ -298,6 +345,21 @@ public class Main extends Application {
                 }
             }
         } // <-- this brace now correctly closes the PLAYING block
+
+        Iterator<Unit> it = units.iterator();
+        while (it.hasNext()) {
+            Unit u = it.next();
+            u.update(delta);
+            if (u.hasReachedEnemyBase()) {
+                if (u.isPlayer) enemyHealth--;
+                else            playerHealth--;
+                it.remove();
+            }
+        }}
+        // ...Game over...
+        if(playerHealth <= 0 || enemyHealth <= 0){
+            gameState = GameState.GAME_OVER;
+        }
     }
 
     private void spawnUnit(boolean isPlayer, String type) {
@@ -310,6 +372,13 @@ public class Main extends Application {
             case "knight" -> new Knight(spawnX, GROUND_Y, isPlayer);
             default       -> new Soldier(spawnX, GROUND_Y, isPlayer);
         };
+        double roll = Math.random();
+        Unit u = Math.random() < 0.5
+                ? new Soldier(spawnX, GROUND_Y, isPlayer)
+                : roll < 0.66
+                ? new Knight(spawnX, GROUND_Y, isPlayer)
+                : new Archer(spawnX, GROUND_Y, isPlayer);
+
         units.add(u);
     }
 
@@ -320,10 +389,39 @@ public class Main extends Application {
 
         if (gameState == GameState.MENU) {
             renderMenu(gc);
-        } else {
+        } else if (gameState == GameState.PLAYING) {
             renderGame(gc);
+        } else if (gameState == GameState.GAME_OVER){
+            renderGameOver(gc);
         }
-    };
+            
+    }
+    private void drawHealthBar(GraphicsContext gc, int x, int health){
+        int barWidth = 120;
+        int barHeight = 14;
+        int barY = GROUND_Y - BASE_HEIGHT - 30;
+
+        // ...Bakgrunn...
+        gc.setFill(Color.web("#3a3a3a"));
+        gc.fillRect(x, barY, barWidth, barHeight);
+
+        // ...Rødt...
+        double fillWidth = ((double) health / MAX_HEALTH) * barWidth;
+        gc.setFill(Color.LIMEGREEN);
+        gc.fillRect(x, barY, fillWidth, barHeight);
+
+        // ...Border...
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokeRect(x, barY, barWidth, barHeight);
+
+        // ...Liv...
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+        gc.fillText(health + "/" + MAX_HEALTH, x + 30, barY + 11);
+    }
+
+
     private void renderGame(GraphicsContext gc){
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
@@ -341,19 +439,26 @@ public class Main extends Application {
         drawBase(gc, LEFT_BASE_X,  GROUND_Y - BASE_HEIGHT, true);
         drawBase(gc, RIGHT_BASE_X, GROUND_Y - BASE_HEIGHT, false);
 
+        drawHealthBar(gc, LEFT_BASE_X, playerHealth);
+        drawHealthBar(gc, RIGHT_BASE_X, enemyHealth);
+
         for (Unit u : units) u.draw(gc);
 
         drawHUD(gc);
     }
     // ...MENU GRAPHICS...
     private void renderMenu(GraphicsContext gc){
+
+        // ...Bakgrunn...
         gc.setFill(Color.web("#3167e4ff"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
 
+        // ... Tittel...
         gc.setFill(Color.WHITE);
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
         gc.fillText("Age of Warish", WIDTH / 2.0 -180, HEIGHT / 2.0 - 80);
 
+        // ...Nytt spill knapp...
         gc.setFill(Color.DARKGRAY);
         gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
 
@@ -377,6 +482,11 @@ public class Main extends Application {
             BUTTON_Y + (BUTTON_HEIGHT + textHeight) / 2 - 4
         );
 
+
+        // ...Fortsett knapp...
+        gc.setFill(Color.GRAY);
+        gc.fillRoundRect(BUTTON_X, BUTTON_Y + BUTTON_HEIGHT + BUTTON_GAP, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
+
         String label1 = "Continue";
         gc.setFont(Font.font("Arial", FontWeight.BOLD, 20));
 
@@ -399,6 +509,66 @@ public class Main extends Application {
     }
 
     private void drawBase(GraphicsContext gc, int x, int y, boolean isPlayer) {
+
+    // --- Colours ---
+    Color stone     = Color.web("#8B7355");
+    Color darkStone = Color.web("#5C4033");
+    Color wood      = Color.web("#8B4513");
+
+    // Main wall — rough stone colour
+    gc.setFill(stone);
+    gc.fillRect(x, y, BASE_WIDTH, BASE_HEIGHT);
+    gc.setStroke(darkStone);
+    gc.setLineWidth(2);
+    gc.strokeRect(x, y, BASE_WIDTH, BASE_HEIGHT);
+
+    // Stone texture — a few rough lines across the wall
+    gc.setStroke(darkStone);
+    gc.setLineWidth(1);
+    gc.strokeLine(x + 10, y + 30, x + BASE_WIDTH - 10, y + 30);
+    gc.strokeLine(x + 5,  y + 60, x + BASE_WIDTH - 5,  y + 60);
+    gc.strokeLine(x + 10, y + 90, x + BASE_WIDTH - 10, y + 90);
+
+    // Wooden stakes on top instead of battlements
+    gc.setFill(wood);
+    for (int i = 0; i < 5; i++) {
+        int stakeX = x + 8 + i * 16;
+        // Stake body
+        gc.fillRect(stakeX, y - 20, 8, 22);
+        // Pointy tip using a triangle
+        gc.fillPolygon(
+            new double[]{stakeX, stakeX + 4, stakeX + 8},
+            new double[]{y - 20, y - 32,     y - 20}, 3
+        );
+    }
+
+    // Cave entrance instead of a door
+    gc.setFill(Color.web("#2b1a0e"));
+    gc.fillOval(x + BASE_WIDTH / 2 - 14, y + BASE_HEIGHT - 40, 28, 38);
+
+    // Flag pole — a crooked stick
+    int poleX = isPlayer ? x + BASE_WIDTH - 8 : x + 8;
+    gc.setStroke(wood);
+    gc.setLineWidth(3);
+    gc.strokeLine(poleX, y - 20, poleX + 3, y - 50);
+
+    // Bone flag — two circles and a rectangle
+    int flagDir = isPlayer ? -1 : 1;
+    gc.setFill(Color.web("#F5F5DC"));
+    gc.fillOval(poleX + flagDir * 2,        y - 54, 10, 8);  // top knob
+    gc.fillOval(poleX + flagDir * 2,        y - 38, 10, 8);  // bottom knob
+    gc.fillRect(poleX + flagDir * 4,        y - 50, 5, 16);  // bone shaft
+
+    // Label
+    gc.setFill(Color.web("#F5F5DC"));
+    gc.setFont(Font.font("Arial", FontWeight.BOLD, 11));
+    String label = isPlayer ? "YOUR BASE" : "ENEMY BASE";
+    gc.fillText(label, x + (isPlayer ? 4 : 2), y - 58);
+}
+
+/* 
+        ...Kode for middelalder utseende...
+        
         Color wall = isPlayer ? Color.STEELBLUE      : Color.FIREBRICK;
         Color roof = isPlayer ? Color.DARKBLUE        : Color.DARKRED;
         Color door = isPlayer ? Color.web("#1a3a5c")  : Color.web("#5c1a1a");
@@ -424,6 +594,9 @@ public class Main extends Application {
         gc.fillRoundRect(dx, dy, dw, dh, 8, 8);
 
         gc.setFill(Color.web("#fffbe6"));
+
+
+        // ...!!!...
         gc.fillRect(x + BASE_WIDTH / 2 - 8, y + BASE_HEIGHT / 4, 16, 16);
         gc.setStroke(roof);
         gc.strokeRect(x + BASE_WIDTH / 2 - 8, y + BASE_HEIGHT / 4, 16, 16);
@@ -450,7 +623,7 @@ public class Main extends Application {
         String label = isPlayer ? "YOUR BASE" : "ENEMY BASE";
         gc.fillText(label, x + (isPlayer ? 4 : 2), y - 58);
     }
-
+*/
     private void drawHUD(GraphicsContext gc) {
         gc.setFill(Color.color(0, 0, 0, 0.55));
         gc.fillRect(0, 0, WIDTH, 44);
@@ -470,6 +643,30 @@ public class Main extends Application {
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
         gc.fillText("Q: Soldier  W: Archer  E: Knight", WIDTH / 2.0 - 95, 28);
+    }
+    // ...GAME OVER GRAFIKK...
+    private void renderGameOver(GraphicsContext gc){
+
+        gc.setFill(Color.web("#000000ff"));
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.setFill(Color.RED);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
+        gc.fillText("GAME OVER", WIDTH / 2.0 - 180, HEIGHT / 2.0 - 60);
+
+        
+        String result = playerHealth <= 0 ? "You Lose!" : "You Win!";
+        Text helper2 = new Text(result);
+        helper2.setFont(gc.getFont());
+        double textWidth2 = helper2.getLayoutBounds().getWidth();
+        double textHeight2 = helper2.getLayoutBounds().getHeight();
+
+        // ... Tittel...
+        gc.setFill(Color.RED);
+        gc.fillText(result,
+            WIDTH / 2.0 - textWidth2 / 2,
+            HEIGHT / 2.0 + textHeight2 / 2
+        );
     }
 
     // ---------------------------------------------------------------
