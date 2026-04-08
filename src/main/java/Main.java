@@ -42,8 +42,7 @@ public class Main extends Application {
     // --- Menu buttons ---
     static final int BUTTON_X = WIDTH / 2 - 100;
     static final int BUTTON_Y = HEIGHT / 2;
-    static final int BUTTON_A = WIDTH / 2 - 100;
-    static final int BUTTON_B = HEIGHT / 2;
+    
 
     static final int BUTTON_WIDTH  = 200;
     static final int BUTTON_HEIGHT = 50;
