@@ -42,11 +42,15 @@ public class Main extends Application {
     // --- Menu buttons ---
     static final int BUTTON_X = WIDTH / 2 - 100;
     static final int BUTTON_Y = HEIGHT / 2;
-    
-
     static final int BUTTON_WIDTH  = 200;
     static final int BUTTON_HEIGHT = 50;
     static final int BUTTON_GAP    = 20;
+
+    static final int TRYAGAIN_X = WIDTH / 2 - 100;
+    static final int TRYAGAIN_Y = HEIGHT / 2 + 80;
+    static final int TRYAGAIN_WIDTH = 200;
+    static final int TRYAGAIN_HEIGHT = 50;
+
 
     // --- Health ---
     static final int MAX_HEALTH = 25;
@@ -262,8 +266,8 @@ public class Main extends Application {
                 }
             }
             if (gameState == GameState.GAME_OVER) {
-                if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH &&
-                    e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT) {
+                if (e.getX() > TRYAGAIN_X && e.getX() < TRYAGAIN_X + TRYAGAIN_WIDTH &&
+                    e.getY() > TRYAGAIN_Y && e.getY() < TRYAGAIN_Y + TRYAGAIN_HEIGHT) {
                     resetGame();
                 }
             }
@@ -459,8 +463,8 @@ public class Main extends Application {
 
         // Try Again button
         gc.setFill(Color.DARKGRAY);
-        gc.fillRoundRect(BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 10, 10);
-        drawCentredText(gc, "Try Again", BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, 20, Color.WHITE);
+        gc.fillRoundRect(TRYAGAIN_X, TRYAGAIN_Y, TRYAGAIN_WIDTH, TRYAGAIN_HEIGHT, 10, 10);
+        drawCentredText(gc, "Try Again", TRYAGAIN_X, TRYAGAIN_Y, TRYAGAIN_WIDTH, TRYAGAIN_HEIGHT, 20, Color.WHITE);
     }
 
     // Helper to draw centred text inside a button rectangle
