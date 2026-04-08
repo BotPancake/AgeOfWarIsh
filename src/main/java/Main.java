@@ -34,7 +34,7 @@ public class Main extends Application {
     static final long SPAWN_COOLDOWN_NS = 1_000_000_000L;
 
     // ...Meny... 
-    enum GameState {MENU, PLAYING}
+    enum GameState {MENU, PLAYING, GAME_OVER}
     private GameState gameState = GameState.MENU;
 
     
@@ -43,6 +43,12 @@ public class Main extends Application {
     static final int BUTTON_WIDTH = 200;
     static final int BUTTON_HEIGHT = 50;
     static final int BUTTON_GAP = 20;
+    
+    static final int MAX_HEALTH = 25;
+    // ...La inn enemyHealth for å sjekke om Game Over Teksten endres om spiller vinner eller taper...
+    static final int MAX_ENEMY_HEALTH = 25;
+
+
 
     
 
@@ -181,6 +187,9 @@ public class Main extends Application {
     private int playerScore = 0;
     private int enemyScore  = 0;
 
+    private int playerHealth = MAX_HEALTH;
+    private int enemyHealth = MAX_ENEMY_HEALTH;
+
     private boolean spawnKeyHeld = false;
 
     // ---------------------------------------------------------------
@@ -200,7 +209,7 @@ public class Main extends Application {
         scene.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.SPACE) spawnKeyHeld = false;
         });
-        scene.setOnMouseClicked(e -> {
+        canvas.setOnMouseClicked(e -> {
             if (gameState == GameState.MENU){
                 if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH && 
                     e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT){
@@ -249,8 +258,8 @@ public class Main extends Application {
             Unit u = it.next();
             u.update(delta);
             if (u.hasReachedEnemyBase()) {
-                if (u.isPlayer) playerScore++;
-                else            enemyScore++;
+                if (u.isPlayer) enemyHealth--;
+                else            playerHealth--;
                 it.remove();
             }
         }}
@@ -274,10 +283,38 @@ public class Main extends Application {
 
         if (gameState == GameState.MENU) {
             renderMenu(gc);
-        } else {
+        } else if (gameState == GameState.PLAYING) {
             renderGame(gc);
+        } else if (gameState == GameState.GAME_OVER){
+            renderGameOver(gc);
         }
-    };
+            
+    }
+    private void drawHealthBar(GraphicsContext gc, int x, int health){
+        int barWidth = 120;
+        int barHeight = 14;
+        int barY = GROUND_Y - BASE_HEIGHT - 30;
+
+        // ...Bakgrunn...
+        gc.setFill(Color.web("#3a3a3a"));
+        gc.fillRect(x, barY, barWidth, barHeight);
+
+        // ...Rødt...
+        double fillWidth = ((double) health / MAX_HEALTH) * barWidth;
+        gc.setFill(Color.LIMEGREEN);
+        gc.fillRect(x, barY, fillWidth, barHeight);
+
+        // ...Border...
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokeRect(x, barY, barWidth, barHeight);
+
+        // ...Liv...
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 10));
+        gc.fillText(health + "/" + MAX_HEALTH, x + 30, barY + 11);
+    }
+
     private void renderGame(GraphicsContext gc){
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
@@ -423,6 +460,29 @@ public class Main extends Application {
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
         gc.fillText("Hold [SPACE] to spawn a unit", WIDTH / 2.0 - 95, 28);
+    }
+    private void renderGameOver(GraphicsContext gc){
+
+        gc.setFill(Color.web("#000000ff"));
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.setFill(Color.RED);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
+        gc.fillText("GAME OVER", WIDTH / 2.0 - 180, HEIGHT / 2.0 - 60);
+
+        
+        String result = playerHealth <= 0 ? "You Lose!" : "You Win!";
+        Text helper2 = new Text(result);
+        helper2.setFont(gc.getFont());
+        double textWidth2 = helper2.getLayoutBounds().getWidth();
+        double textHeight2 = helper2.getLayoutBounds().getHeight();
+
+        // ... Tittel...
+        gc.setFill(Color.RED);
+        gc.fillText(result,
+            WIDTH / 2.0 - textWidth2 / 2,
+            HEIGHT / 2.0 + textHeight2 / 2
+        );
     }
 
     // ---------------------------------------------------------------
