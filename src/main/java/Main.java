@@ -336,6 +336,10 @@ public class Main extends Application {
             while (it.hasNext()) {
                 Unit u = it.next();
                 u.update(delta);
+                if (u.health <= 0){
+                    it.remove();
+                    continue;
+                }
                 if (u.hasReachedEnemyBase()) {
                     if (u.isPlayer) enemyHealth--;
                     else            playerHealth--;
