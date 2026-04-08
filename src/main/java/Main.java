@@ -96,7 +96,7 @@ public class Main extends Application {
             this.speed = 60.0;
             this.health = 30.0;
             this.maxHealth = 30.0;
-            this.health = 10.0;
+            this.damage = 10.0;
         }
 
         @Override
