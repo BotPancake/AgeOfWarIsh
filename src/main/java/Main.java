@@ -40,8 +40,11 @@ public class Main extends Application {
     static final long ENEMY_COOLDOWN_NS   = 2_000_000_000L;
 
     // --- Menu buttons ---
-    static final int BUTTON_X      = WIDTH / 2 - 100;
-    static final int BUTTON_Y      = HEIGHT / 2;
+    static final int BUTTON_X = WIDTH / 2 - 100;
+    static final int BUTTON_Y = HEIGHT / 2;
+    static final int BUTTON_A = WIDTH / 2 - 100;
+    static final int BUTTON_B = HEIGHT / 2;
+
     static final int BUTTON_WIDTH  = 200;
     static final int BUTTON_HEIGHT = 50;
     static final int BUTTON_GAP    = 20;
@@ -346,6 +349,7 @@ public class Main extends Application {
                     it.remove();
                 }
             }
+            // ...COLLION...
             for (Unit u : units){
                 u.fighting = false;
                 for (Unit other : units){
