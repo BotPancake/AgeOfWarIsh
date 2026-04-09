@@ -1,4 +1,4 @@
 playerHealth=25
 enemyHealth=25
-playerScore=0
-enemyScore=0
+playerScore=1
+enemyScore=1
