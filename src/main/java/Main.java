@@ -38,6 +38,7 @@ public class Main extends Application {
     static final long ARCHER_COOLDOWN_NS  = 2_500_000_000L;
     static final long KNIGHT_COOLDOWN_NS  = 5_000_000_000L;
     static final long ENEMY_COOLDOWN_NS   = 2_000_000_000L;
+    private long lastTime = 0;
 
     // --- Menu buttons ---
     static final int BUTTON_X = WIDTH / 2 - 100;
@@ -280,7 +281,6 @@ public class Main extends Application {
         });
 
         AnimationTimer timer = new AnimationTimer() {
-            private long lastTime = 0;
 
             @Override
             public void handle(long now) {
@@ -407,6 +407,43 @@ public class Main extends Application {
         }
     }
 
+    private void drawCooldownBars(GraphicsContext gc, long now) {
+        int barWidth  = 120;
+        int barHeight = 16;
+        int startX    = 20;
+        int startY    = 55;
+        int gap       = 24;
+
+        String[] labels    = {"Q: Soldier", "W: Archer", "E: Knight"};
+        long[]   cooldowns = {SOLDIER_COOLDOWN_NS, ARCHER_COOLDOWN_NS, KNIGHT_COOLDOWN_NS};
+        long[]   lastSpawn = {lastSoldierSpawn, lastArcherSpawn, lastKnightSpawn};
+        Color[]  colors    = {Color.CORNFLOWERBLUE, Color.CYAN, Color.DARKSLATEBLUE};
+
+        for (int i = 0; i < 3; i++) {
+            long elapsed  = now - lastSpawn[i];
+            double filled = Math.min((double) elapsed / cooldowns[i], 1.0);
+            boolean ready = filled >= 1.0;
+
+            // Background
+            gc.setFill(Color.color(0, 0, 0, 0.5));
+            gc.fillRect(startX, startY + i * gap, barWidth, barHeight);
+
+            // Fill
+            gc.setFill(ready ? Color.LIMEGREEN : colors[i]);
+            gc.fillRect(startX, startY + i * gap, barWidth * filled, barHeight);
+
+            // Border
+            gc.setStroke(Color.WHITE);
+            gc.setLineWidth(1);
+            gc.strokeRect(startX, startY + i * gap, barWidth, barHeight);
+
+            // Label
+            gc.setFill(Color.WHITE);
+            gc.setFont(Font.font("Arial", FontWeight.BOLD, 11));
+            gc.fillText(ready ? labels[i] + " READY" : labels[i], startX + 4, startY + i * gap + 12);
+        }
+    }
+
     private void renderGame(GraphicsContext gc) {
         gc.setFill(Color.web("#87CEEB"));
         gc.fillRect(0, 0, WIDTH, HEIGHT);
@@ -429,7 +466,10 @@ public class Main extends Application {
 
         for (Unit u : units) u.draw(gc);
 
+
+
         drawHUD(gc);
+        drawCooldownBars(gc, lastTime);
     }
 
     private void renderMenu(GraphicsContext gc) {
