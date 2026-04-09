@@ -15,6 +15,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+// ...Lagring og lasting...
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
+
+
+
 public class Main extends Application {
 
     // --- Window & World ---
@@ -40,6 +48,9 @@ public class Main extends Application {
     static final long ENEMY_COOLDOWN_NS   = 2_000_000_000L;
     private long lastTime = 0;
 
+    // --- Save popup ---
+    private long LastSaveTime = 0;
+
     // --- Menu buttons ---
     static final int BUTTON_X = WIDTH / 2 - 100;
     static final int BUTTON_Y = HEIGHT / 2;
@@ -57,7 +68,7 @@ public class Main extends Application {
     static final int MAX_HEALTH = 25;
 
     // --- Game state enum ---
-    enum GameState { MENU, PLAYING, GAME_OVER }
+    enum GameState { MENU, PLAYING, PAUSED, GAME_OVER }
     private GameState gameState = GameState.MENU;
 
     // ---------------------------------------------------------------
@@ -258,6 +269,11 @@ public class Main extends Application {
             if (e.getCode() == KeyCode.Q) spawnSoldier = true;
             if (e.getCode() == KeyCode.W) spawnArcher  = true;
             if (e.getCode() == KeyCode.E) spawnKnight  = true;
+            if (e.getCode() == KeyCode.S) saveGame();
+            if(e.getCode() == KeyCode.ESCAPE){
+                if (gameState == GameState.PLAYING) gameState = GameState.PAUSED;
+                else if (gameState == GameState.PAUSED) gameState = GameState.PLAYING;
+            }
         });
         scene.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.Q) spawnSoldier = false;
@@ -271,13 +287,21 @@ public class Main extends Application {
                     e.getY() > BUTTON_Y && e.getY() < BUTTON_Y + BUTTON_HEIGHT) {
                     gameState = GameState.PLAYING;
                 }
+                if (e.getX() > BUTTON_X && e.getX() < BUTTON_X + BUTTON_WIDTH &&
+                    e.getY() > BUTTON_Y + BUTTON_HEIGHT + BUTTON_GAP &&
+                    e.getY() < BUTTON_Y + BUTTON_HEIGHT + BUTTON_GAP + BUTTON_HEIGHT){
+                        loadGame();
+                        gameState = GameState.PLAYING;
+                    }
             }
+
             if (gameState == GameState.GAME_OVER) {
                 if (e.getX() > TRYAGAIN_X && e.getX() < TRYAGAIN_X + TRYAGAIN_WIDTH &&
                     e.getY() > TRYAGAIN_Y && e.getY() < TRYAGAIN_Y + TRYAGAIN_HEIGHT) {
                     resetGame();
                 }
             }
+            
         });
 
         AnimationTimer timer = new AnimationTimer() {
@@ -349,6 +373,8 @@ public class Main extends Application {
                 Unit u = it.next();
                 u.update(delta);
                 if (u.health <= 0){
+                    if (u.isPlayer) enemyScore++;
+                    else playerScore++;
                     it.remove();
                     continue;
                 }
@@ -358,7 +384,7 @@ public class Main extends Application {
                     it.remove();
                 }
             }
-            // ...COLLION...
+            // ...COLLISION...
             for (Unit u : units){
                 u.fighting = false;
                 for (Unit other : units){
@@ -404,6 +430,8 @@ public class Main extends Application {
             renderGame(gc);
         } else if (gameState == GameState.GAME_OVER) {
             renderGameOver(gc);
+        }else if (gameState == GameState.PAUSED){
+            renderPaused(gc);
         }
     }
 
@@ -466,10 +494,17 @@ public class Main extends Application {
 
         for (Unit u : units) u.draw(gc);
 
-
-
         drawHUD(gc);
         drawCooldownBars(gc, lastTime);
+
+        // ...Saved popup...
+        if (System.nanoTime() - LastSaveTime < 2_000_000_000L){
+            gc.setFill(Color.web("#00000088"));
+            gc.fillRoundRect(WIDTH / 2 - 80, 60, 160, 36, 8, 8);
+            gc.setFill(Color.LIMEGREEN);
+            gc.setFont(Font.font("Arial", FontWeight.BOLD, 16 ));
+            gc.fillText("Game saved!", WIDTH / 2.0 - 48,84);
+        }
     }
 
     private void renderMenu(GraphicsContext gc) {
@@ -512,6 +547,24 @@ public class Main extends Application {
         gc.fillRoundRect(TRYAGAIN_X, TRYAGAIN_Y, TRYAGAIN_WIDTH, TRYAGAIN_HEIGHT, 10, 10);
         drawCentredText(gc, "Try Again", TRYAGAIN_X, TRYAGAIN_Y, TRYAGAIN_WIDTH, TRYAGAIN_HEIGHT, 20, Color.WHITE);
     }
+    // ...Paused Game...
+    private void renderPaused(GraphicsContext gc){
+        renderGame(gc);
+
+        gc.setFill(Color.color(0, 0, 0, 0.5));
+        gc.fillRect(0, 0, WIDTH, HEIGHT);
+
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", FontWeight.BOLD, 62));
+        gc.fillText("PAUSED", WIDTH / 2.0 - 130, HEIGHT / 2.0 - 20);
+
+        gc.setFill(Color.LIGHTGRAY);
+        gc.setFont(Font.font("Arial", FontWeight.NORMAL, 18));
+        gc.fillText("Press ESCAPE to resume", WIDTH / 2.0 - 80, HEIGHT / 2.0 + 30);
+
+    }
+
+    
 
     // Helper to draw centred text inside a button rectangle
     private void drawCentredText(GraphicsContext gc, String text, int bx, int by, int bw, int bh, int fontSize, Color colour) {
@@ -603,16 +656,59 @@ public class Main extends Application {
         gc.setFill(Color.CORNFLOWERBLUE);
         gc.fillText("PLAYER", 20, 28);
         gc.setFill(Color.WHITE);
-        gc.fillText("Score: " + playerScore, 100, 28);
+        gc.fillText("KILLS: " + playerScore, 100, 28);
 
         gc.setFill(Color.TOMATO);
         gc.fillText("ENEMY", WIDTH - 200, 28);
         gc.setFill(Color.WHITE);
-        gc.fillText("Score: " + enemyScore, WIDTH - 120, 28);
+        gc.fillText("KILLS: " + enemyScore, WIDTH - 120, 28);
 
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
         gc.fillText("Q: Soldier  W: Archer  E: Knight", WIDTH / 2.0 - 95, 28);
+    }
+
+    private void saveGame() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("save.txt"));
+            writer.write("playerHealth=" + playerHealth);
+            writer.newLine();
+
+            writer.write("enemyHealth=" + enemyHealth);
+            writer.newLine();
+
+            writer.write("playerScore=" + playerScore);
+            writer.newLine();
+
+            writer.write("enemyScore=" + enemyScore);
+            writer.newLine();
+            writer.close();
+
+            LastSaveTime = System.nanoTime();
+
+        } catch (Exception e){
+            System.out.println("Could not save" + e.getMessage());
+        }
+    }
+
+    private void loadGame(){
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader("save.txt"));
+            String line;
+            while ((line = reader.readLine()) != null){
+                String[] parts = line.split("=");
+                String key = parts[0];
+                String value = parts[1];
+
+                if (key.equals("playerHealth")) playerHealth = Integer.parseInt(value);
+                if (key.equals("enemyHealth")) enemyHealth = Integer.parseInt(value);
+                if (key.equals("playerScore")) playerScore = Integer.parseInt(value);
+                if (key.equals("enemyScore")) enemyScore = Integer.parseInt(value);
+            }
+            reader.close();
+        } catch (Exception e){
+            System.out.println("Could not load" + e.getMessage());
+        }
     }
 
     // ---------------------------------------------------------------
