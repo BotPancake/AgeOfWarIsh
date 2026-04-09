@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="GameTest" time="0.034" tests="10" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="GameTest" time="0.035" tests="10" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="26"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="NO"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-26\bin"/>
-    <property name="sun.java.command" value="C:\Users\Kristian Helland\AppData\Local\Temp\surefire11999836441750910904\surefirebooter-20260409034546519_3.jar C:\Users\Kristian Helland\AppData\Local\Temp\surefire11999836441750910904 2026-04-09T03-45-46_223-jvmRun1 surefire-20260409034546519_1tmp surefire_0-20260409034546519_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\Kristian Helland\AppData\Local\Temp\surefire12481498293364793119\surefirebooter-20260409190229058_3.jar C:\Users\Kristian Helland\AppData\Local\Temp\surefire12481498293364793119 2026-04-09T19-02-28_988-jvmRun1 surefire-20260409190229058_1tmp surefire_0-20260409190229058_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="C:\Users\Kristian Helland\IdeaProjects\AgeOfWarish\target\test-classes;C:\Users\Kristian Helland\IdeaProjects\AgeOfWarish\target\classes;C:\Users\Kristian Helland\.m2\repository\org\openjfx\javafx-controls\21\javafx-controls-21.jar;C:\Users\Kristian Helland\.m2\repository\org\openjfx\javafx-controls\21\javafx-controls-21-win.jar;C:\Users\Kristian Helland\.m2\repository\org\openjfx\javafx-graphics\21\javafx-graphics-21.jar;C:\Users\Kristian Helland\.m2\repository\org\openjfx\javafx-graphics\21\javafx-graphics-21-win.jar;C:\Users\Kristian Helland\.m2\repository\org\openjfx\javafx-base\21\javafx-base-21.jar;C:\Users\Kristian Helland\.m2\repository\org\openjfx\javafx-base\21\javafx-base-21-win.jar;C:\Users\Kristian Helland\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.12.1\junit-jupiter-api-5.12.1.jar;C:\Users\Kristian Helland\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\Kristian Helland\.m2\repository\org\junit\platform\junit-platform-commons\1.12.1\junit-platform-commons-1.12.1.jar;C:\Users\Kristian Helland\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\Kristian Helland\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.12.1\junit-jupiter-engine-5.12.1.jar;C:\Users\Kristian Helland\.m2\repository\org\junit\platform\junit-platform-engine\1.12.1\junit-platform-engine-1.12.1.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\Kristian Helland\AppData\Local\Temp\surefire11999836441750910904\surefirebooter-20260409034546519_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\Kristian Helland\AppData\Local\Temp\surefire12481498293364793119\surefirebooter-20260409190229058_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="26+35-2893"/>
@@ -60,13 +60,13 @@
     <property name="java.class.version" value="70.0"/>
   </properties>
   <testcase name="unitTakesDamageCorrectly" classname="GameTest" time="0.013"/>
-  <testcase name="unitDiesWhenHealthReachesZero" classname="GameTest" time="0.001"/>
-  <testcase name="knightHasCorrectStats" classname="GameTest" time="0.0"/>
+  <testcase name="unitDiesWhenHealthReachesZero" classname="GameTest" time="0.002"/>
+  <testcase name="knightHasCorrectStats" classname="GameTest" time="0.001"/>
   <testcase name="unitHasNotReachedBaseYet" classname="GameTest" time="0.0"/>
-  <testcase name="enemyUnitDetectsPlayerBase" classname="GameTest" time="0.0"/>
+  <testcase name="enemyUnitDetectsPlayerBase" classname="GameTest" time="0.001"/>
   <testcase name="playerUnitMovesRight" classname="GameTest" time="0.001"/>
   <testcase name="archerHasCorrectStats" classname="GameTest" time="0.001"/>
-  <testcase name="enemyUnitMovesLeft" classname="GameTest" time="0.0"/>
-  <testcase name="soldierHasCorrectStats" classname="GameTest" time="0.001"/>
-  <testcase name="playerUnitDetectsEnemyBase" classname="GameTest" time="0.0"/>
+  <testcase name="enemyUnitMovesLeft" classname="GameTest" time="0.001"/>
+  <testcase name="soldierHasCorrectStats" classname="GameTest" time="0.0"/>
+  <testcase name="playerUnitDetectsEnemyBase" classname="GameTest" time="0.001"/>
 </testsuite>

@@ -74,7 +74,7 @@ public class Main extends Application {
     // ---------------------------------------------------------------
     // Abstract Unit base class
     // ---------------------------------------------------------------
-    static abstract class Unit {
+    static abstract class Unit implements Drawable {
         double x, y;
         boolean isPlayer;
         double speed;
@@ -90,7 +90,7 @@ public class Main extends Application {
             this.isPlayer = isPlayer;
         }
 
-        abstract void draw(GraphicsContext gc);
+        public abstract void draw(GraphicsContext gc);
 
         
 
@@ -120,7 +120,7 @@ public class Main extends Application {
         }
 
         @Override
-        void draw(GraphicsContext gc) {
+        public void draw(GraphicsContext gc) {
             Color body    = isPlayer ? Color.CORNFLOWERBLUE : Color.TOMATO;
             Color outline = isPlayer ? Color.DARKBLUE       : Color.DARKRED;
 
@@ -169,7 +169,7 @@ public class Main extends Application {
         }
 
         @Override
-        void draw(GraphicsContext gc) {
+        public void draw(GraphicsContext gc) {
             Color body    = isPlayer ? Color.DARKSLATEBLUE : Color.DARKRED;
             Color outline = isPlayer ? Color.MIDNIGHTBLUE  : Color.MAROON;
 
@@ -215,7 +215,7 @@ public class Main extends Application {
         }
 
         @Override
-        void draw(GraphicsContext gc) {
+        public void draw(GraphicsContext gc) {
             Color body    = isPlayer ? Color.CYAN      : Color.ORANGE;
             Color outline = isPlayer ? Color.DARKCYAN  : Color.DARKORANGE;
 
@@ -250,9 +250,7 @@ public class Main extends Application {
     private int playerHealth = MAX_HEALTH;
     private int enemyHealth  = MAX_HEALTH;
 
-    private boolean spawnSoldier = false;
-    private boolean spawnArcher  = false;
-    private boolean spawnKnight  = false;
+    private final InputHandler input = new InputHandler();
 
     // ---------------------------------------------------------------
     // JavaFX entry point
@@ -265,21 +263,8 @@ public class Main extends Application {
         StackPane root = new StackPane(canvas);
         Scene scene = new Scene(root, WIDTH, HEIGHT);
 
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.Q) spawnSoldier = true;
-            if (e.getCode() == KeyCode.W) spawnArcher  = true;
-            if (e.getCode() == KeyCode.E) spawnKnight  = true;
-            if (e.getCode() == KeyCode.S) saveGame();
-            if(e.getCode() == KeyCode.ESCAPE){
-                if (gameState == GameState.PLAYING) gameState = GameState.PAUSED;
-                else if (gameState == GameState.PAUSED) gameState = GameState.PLAYING;
-            }
-        });
-        scene.setOnKeyReleased(e -> {
-            if (e.getCode() == KeyCode.Q) spawnSoldier = false;
-            if (e.getCode() == KeyCode.W) spawnArcher  = false;
-            if (e.getCode() == KeyCode.E) spawnKnight  = false;
-        });
+        scene.setOnKeyPressed(e -> input.handleKeyPressed(e.getCode()));
+        scene.setOnKeyReleased(e -> input.handleKeyReleased(e.getCode()));
 
         canvas.setOnMouseClicked(e -> {
             if (gameState == GameState.MENU) {
@@ -349,15 +334,15 @@ public class Main extends Application {
         if (gameState == GameState.PLAYING) {
 
             // Player spawning
-            if (spawnSoldier && (now - lastSoldierSpawn) >= SOLDIER_COOLDOWN_NS) {
+            if (input.spawnSoldier && (now - lastSoldierSpawn) >= SOLDIER_COOLDOWN_NS) {
                 spawnUnit(true, "soldier");
                 lastSoldierSpawn = now;
             }
-            if (spawnArcher && (now - lastArcherSpawn) >= ARCHER_COOLDOWN_NS) {
+            if (input.spawnArcher && (now - lastArcherSpawn) >= ARCHER_COOLDOWN_NS) {
                 spawnUnit(true, "archer");
                 lastArcherSpawn = now;
             }
-            if (spawnKnight && (now - lastKnightSpawn) >= KNIGHT_COOLDOWN_NS) {
+            if (input.spawnKnight && (now - lastKnightSpawn) >= KNIGHT_COOLDOWN_NS) {
                 spawnUnit(true, "knight");
                 lastKnightSpawn = now;
             }

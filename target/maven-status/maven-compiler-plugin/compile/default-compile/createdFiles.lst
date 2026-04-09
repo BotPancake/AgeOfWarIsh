@@ -1,4 +1,6 @@
 Main.class
+InputHandler.class
+Drawable.class
 Main$Unit.class
 Main$GameState.class
 Main$Soldier.class
