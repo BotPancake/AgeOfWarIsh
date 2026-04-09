@@ -310,6 +310,9 @@ public class Main extends Application {
             public void handle(long now) {
                 if (lastTime == 0) { lastTime = now; return; }
                 double delta = (now - lastTime) / 1_000_000_000.0;
+                // ...Feilhåndtering ved lag, capper fps og sakker ned koden, for å forhindre at units teleporterer...
+                delta = Math.min(delta, 0.05);
+                // ...Feilhåndtering ved lag, capper fps og sakker ned koden, for å forhindre at units teleporterer...
                 lastTime = now;
                 update(now, delta);
                 render(gc);
@@ -398,7 +401,10 @@ public class Main extends Application {
                     }
                 }
             }
-            
+            // ... Feilhåndtering dersom health går under null før Game over sjekkes
+            playerHealth = Math.max(playerHealth, 0);
+            enemyHealth = Math.max(enemyHealth, 0);
+            // ... -||- ...
 
             // Check for game over
             if (playerHealth <= 0 || enemyHealth <= 0) {
@@ -692,6 +698,14 @@ public class Main extends Application {
     }
 
     private void loadGame(){
+
+        // ...Feilhåndtering dersom save.txt ikke finnes
+        java.io.File saveFile = new java.io.File("save.txt");
+        if (!saveFile.exists()){
+            System.out.println("No save file found!");
+            return;
+        // ...Feilhåndtering dersom save.txt ikke finnes
+        }
         try{
             BufferedReader reader = new BufferedReader(new FileReader("save.txt"));
             String line;
@@ -708,6 +722,13 @@ public class Main extends Application {
             reader.close();
         } catch (Exception e){
             System.out.println("Could not load" + e.getMessage());
+            // ... Reset til default dersom load failer
+            playerHealth = MAX_HEALTH;
+            enemyHealth = MAX_HEALTH;
+            playerScore = 0;
+            enemyScore = 0;
+
+            // ... Reset til default dersom load failer
         }
     }
 
