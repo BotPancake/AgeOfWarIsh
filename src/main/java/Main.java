@@ -69,6 +69,7 @@ public class Main extends Application {
         double maxHealth;
         double health;
         double damage;
+        double attackRange;
         boolean fighting;
 
         Unit(double x, double y, boolean isPlayer) {
@@ -103,6 +104,7 @@ public class Main extends Application {
             this.health = 30.0;
             this.maxHealth = 30.0;
             this.damage = 10.0;
+            this.attackRange = 40.0;
         }
 
         @Override
@@ -150,6 +152,8 @@ public class Main extends Application {
             this.health = 80.0;
             this.maxHealth = 80.0;
             this.damage = 15.0;
+            this.attackRange = 40.0;
+
         }
 
         @Override
@@ -194,6 +198,8 @@ public class Main extends Application {
             this.health = 20.0;
             this.maxHealth = 20.0;
             this.damage = 8.0;
+            this.attackRange = 120.0;
+
         }
 
         @Override
@@ -358,7 +364,7 @@ public class Main extends Application {
                 for (Unit other : units){
                     if (other.isPlayer != u.isPlayer){
                         double distance = Math.abs(u.x - other.x);
-                        if (distance < 40){
+                        if (distance < u.attackRange){
                             u.fighting = true;
                             other.health -= u.damage * delta;
                         }
