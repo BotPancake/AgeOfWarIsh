@@ -1,5 +1,8 @@
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.io.*;
+import org.junit.jupiter.api.AfterEach;
+
 
 public class GameTest {
 
@@ -80,5 +83,42 @@ public class GameTest {
         Main.Soldier s = new Main.Soldier(0, 0, true);
         s.health = 0;
         assertTrue(s.health <= 0);
+    }
+
+    @Test
+    void saveAndLoadGame() throws Exception {
+        // Skriv en save.txt fil manuelt
+        BufferedWriter writer = new BufferedWriter(new FileWriter("save.txt"));
+        writer.write("playerHealth=20"); writer.newLine();
+        writer.write("enemyHealth=15");  writer.newLine();
+        writer.write("playerScore=5");   writer.newLine();
+        writer.write("enemyScore=3");    writer.newLine();
+        writer.close();
+
+        // Les filen tilbake og sjekk verdiene
+        BufferedReader reader = new BufferedReader(new FileReader("save.txt"));
+        String line;
+        int playerHealth = 0, enemyHealth = 0, playerScore = 0, enemyScore = 0;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.split("=");
+            switch (parts[0]) {
+                case "playerHealth" -> playerHealth = Integer.parseInt(parts[1]);
+                case "enemyHealth"  -> enemyHealth  = Integer.parseInt(parts[1]);
+                case "playerScore"  -> playerScore  = Integer.parseInt(parts[1]);
+                case "enemyScore"   -> enemyScore   = Integer.parseInt(parts[1]);
+            }
+        }
+        reader.close();
+
+        assertEquals(20, playerHealth);
+        assertEquals(15, enemyHealth);
+        assertEquals(5,  playerScore);
+        assertEquals(3,  enemyScore);
+    }
+
+    // Sletter testfilen etter testen kjører
+    @AfterEach
+    void cleanup() {
+        new java.io.File("save.txt").delete();
     }
 }

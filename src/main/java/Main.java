@@ -1,3 +1,4 @@
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -74,7 +75,7 @@ public class Main extends Application {
     // ---------------------------------------------------------------
     // Abstract Unit base class
     // ---------------------------------------------------------------
-    static abstract class Unit {
+    static abstract class Unit implements Drawable {
         double x, y;
         boolean isPlayer;
         double speed;
@@ -90,7 +91,7 @@ public class Main extends Application {
             this.isPlayer = isPlayer;
         }
 
-        abstract void draw(GraphicsContext gc);
+        public abstract void draw(GraphicsContext gc);
 
         
 
@@ -120,7 +121,7 @@ public class Main extends Application {
         }
 
         @Override
-        void draw(GraphicsContext gc) {
+        public void draw(GraphicsContext gc) {
             Color body    = isPlayer ? Color.CORNFLOWERBLUE : Color.TOMATO;
             Color outline = isPlayer ? Color.DARKBLUE       : Color.DARKRED;
 
@@ -169,7 +170,7 @@ public class Main extends Application {
         }
 
         @Override
-        void draw(GraphicsContext gc) {
+        public void draw(GraphicsContext gc) {
             Color body    = isPlayer ? Color.DARKSLATEBLUE : Color.DARKRED;
             Color outline = isPlayer ? Color.MIDNIGHTBLUE  : Color.MAROON;
 
@@ -215,7 +216,7 @@ public class Main extends Application {
         }
 
         @Override
-        void draw(GraphicsContext gc) {
+        public void draw(GraphicsContext gc) {
             Color body    = isPlayer ? Color.CYAN      : Color.ORANGE;
             Color outline = isPlayer ? Color.DARKCYAN  : Color.DARKORANGE;
 
@@ -250,9 +251,8 @@ public class Main extends Application {
     private int playerHealth = MAX_HEALTH;
     private int enemyHealth  = MAX_HEALTH;
 
-    private boolean spawnSoldier = false;
-    private boolean spawnArcher  = false;
-    private boolean spawnKnight  = false;
+    private final InputHandler input = new InputHandler();
+    private final FileHandler fileHandler = new FileHandler();
 
     // ---------------------------------------------------------------
     // JavaFX entry point
@@ -265,21 +265,8 @@ public class Main extends Application {
         StackPane root = new StackPane(canvas);
         Scene scene = new Scene(root, WIDTH, HEIGHT);
 
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.Q) spawnSoldier = true;
-            if (e.getCode() == KeyCode.W) spawnArcher  = true;
-            if (e.getCode() == KeyCode.E) spawnKnight  = true;
-            if (e.getCode() == KeyCode.S) saveGame();
-            if(e.getCode() == KeyCode.ESCAPE){
-                if (gameState == GameState.PLAYING) gameState = GameState.PAUSED;
-                else if (gameState == GameState.PAUSED) gameState = GameState.PLAYING;
-            }
-        });
-        scene.setOnKeyReleased(e -> {
-            if (e.getCode() == KeyCode.Q) spawnSoldier = false;
-            if (e.getCode() == KeyCode.W) spawnArcher  = false;
-            if (e.getCode() == KeyCode.E) spawnKnight  = false;
-        });
+        scene.setOnKeyPressed(e -> input.handleKeyPressed(e.getCode()));
+        scene.setOnKeyReleased(e -> input.handleKeyReleased(e.getCode()));
 
         canvas.setOnMouseClicked(e -> {
             if (gameState == GameState.MENU) {
@@ -349,15 +336,15 @@ public class Main extends Application {
         if (gameState == GameState.PLAYING) {
 
             // Player spawning
-            if (spawnSoldier && (now - lastSoldierSpawn) >= SOLDIER_COOLDOWN_NS) {
+            if (input.spawnSoldier && (now - lastSoldierSpawn) >= SOLDIER_COOLDOWN_NS) {
                 spawnUnit(true, "soldier");
                 lastSoldierSpawn = now;
             }
-            if (spawnArcher && (now - lastArcherSpawn) >= ARCHER_COOLDOWN_NS) {
+            if (input.spawnArcher && (now - lastArcherSpawn) >= ARCHER_COOLDOWN_NS) {
                 spawnUnit(true, "archer");
                 lastArcherSpawn = now;
             }
-            if (spawnKnight && (now - lastKnightSpawn) >= KNIGHT_COOLDOWN_NS) {
+            if (input.spawnKnight && (now - lastKnightSpawn) >= KNIGHT_COOLDOWN_NS) {
                 spawnUnit(true, "knight");
                 lastKnightSpawn = now;
             }
@@ -385,6 +372,10 @@ public class Main extends Application {
                     if (u.isPlayer) enemyHealth--;
                     else            playerHealth--;
                     it.remove();
+                }
+                if (input.save) {
+                    saveGame();
+                    input.save = false;
                 }
             }
             // ...COLLISION...
@@ -671,65 +662,19 @@ public class Main extends Application {
 
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("Q: Soldier  W: Archer  E: Knight", WIDTH / 2.0 - 95, 28);
-    }
+        gc.fillText("Q: Soldier  W: Archer  E: Knight  S: Save", WIDTH / 2.0 - 115, 28);    }
 
     private void saveGame() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("save.txt"));
-            writer.write("playerHealth=" + playerHealth);
-            writer.newLine();
-
-            writer.write("enemyHealth=" + enemyHealth);
-            writer.newLine();
-
-            writer.write("playerScore=" + playerScore);
-            writer.newLine();
-
-            writer.write("enemyScore=" + enemyScore);
-            writer.newLine();
-            writer.close();
-
-            LastSaveTime = System.nanoTime();
-
-        } catch (Exception e){
-            System.out.println("Could not save" + e.getMessage());
-        }
+        fileHandler.save(playerHealth, enemyHealth, playerScore, enemyScore);
+        LastSaveTime = System.nanoTime();
     }
 
-    private void loadGame(){
-
-        // ...Feilhåndtering dersom save.txt ikke finnes
-        java.io.File saveFile = new java.io.File("save.txt");
-        if (!saveFile.exists()){
-            System.out.println("No save file found!");
-            return;
-        // ...Feilhåndtering dersom save.txt ikke finnes
-        }
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader("save.txt"));
-            String line;
-            while ((line = reader.readLine()) != null){
-                String[] parts = line.split("=");
-                String key = parts[0];
-                String value = parts[1];
-
-                if (key.equals("playerHealth")) playerHealth = Integer.parseInt(value);
-                if (key.equals("enemyHealth")) enemyHealth = Integer.parseInt(value);
-                if (key.equals("playerScore")) playerScore = Integer.parseInt(value);
-                if (key.equals("enemyScore")) enemyScore = Integer.parseInt(value);
-            }
-            reader.close();
-        } catch (Exception e){
-            System.out.println("Could not load" + e.getMessage());
-            // ... Reset til default dersom load failer
-            playerHealth = MAX_HEALTH;
-            enemyHealth = MAX_HEALTH;
-            playerScore = 0;
-            enemyScore = 0;
-
-            // ... Reset til default dersom load failer
-        }
+    private void loadGame() {
+        int[] values = fileHandler.load();
+        playerHealth = values[0];
+        enemyHealth  = values[1];
+        playerScore  = values[2];
+        enemyScore   = values[3];
     }
 
     // ---------------------------------------------------------------
