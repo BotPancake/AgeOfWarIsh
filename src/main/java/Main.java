@@ -1,3 +1,4 @@
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -251,6 +252,7 @@ public class Main extends Application {
     private int enemyHealth  = MAX_HEALTH;
 
     private final InputHandler input = new InputHandler();
+    private final FileHandler fileHandler = new FileHandler();
 
     // ---------------------------------------------------------------
     // JavaFX entry point
@@ -370,6 +372,10 @@ public class Main extends Application {
                     if (u.isPlayer) enemyHealth--;
                     else            playerHealth--;
                     it.remove();
+                }
+                if (input.save) {
+                    saveGame();
+                    input.save = false;
                 }
             }
             // ...COLLISION...
@@ -656,65 +662,19 @@ public class Main extends Application {
 
         gc.setFill(Color.web("#ffe066"));
         gc.setFont(Font.font("Arial", FontWeight.NORMAL, 13));
-        gc.fillText("Q: Soldier  W: Archer  E: Knight", WIDTH / 2.0 - 95, 28);
-    }
+        gc.fillText("Q: Soldier  W: Archer  E: Knight  S: Save", WIDTH / 2.0 - 115, 28);    }
 
     private void saveGame() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("save.txt"));
-            writer.write("playerHealth=" + playerHealth);
-            writer.newLine();
-
-            writer.write("enemyHealth=" + enemyHealth);
-            writer.newLine();
-
-            writer.write("playerScore=" + playerScore);
-            writer.newLine();
-
-            writer.write("enemyScore=" + enemyScore);
-            writer.newLine();
-            writer.close();
-
-            LastSaveTime = System.nanoTime();
-
-        } catch (Exception e){
-            System.out.println("Could not save" + e.getMessage());
-        }
+        fileHandler.save(playerHealth, enemyHealth, playerScore, enemyScore);
+        LastSaveTime = System.nanoTime();
     }
 
-    private void loadGame(){
-
-        // ...Feilhåndtering dersom save.txt ikke finnes
-        java.io.File saveFile = new java.io.File("save.txt");
-        if (!saveFile.exists()){
-            System.out.println("No save file found!");
-            return;
-        // ...Feilhåndtering dersom save.txt ikke finnes
-        }
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader("save.txt"));
-            String line;
-            while ((line = reader.readLine()) != null){
-                String[] parts = line.split("=");
-                String key = parts[0];
-                String value = parts[1];
-
-                if (key.equals("playerHealth")) playerHealth = Integer.parseInt(value);
-                if (key.equals("enemyHealth")) enemyHealth = Integer.parseInt(value);
-                if (key.equals("playerScore")) playerScore = Integer.parseInt(value);
-                if (key.equals("enemyScore")) enemyScore = Integer.parseInt(value);
-            }
-            reader.close();
-        } catch (Exception e){
-            System.out.println("Could not load" + e.getMessage());
-            // ... Reset til default dersom load failer
-            playerHealth = MAX_HEALTH;
-            enemyHealth = MAX_HEALTH;
-            playerScore = 0;
-            enemyScore = 0;
-
-            // ... Reset til default dersom load failer
-        }
+    private void loadGame() {
+        int[] values = fileHandler.load();
+        playerHealth = values[0];
+        enemyHealth  = values[1];
+        playerScore  = values[2];
+        enemyScore   = values[3];
     }
 
     // ---------------------------------------------------------------
