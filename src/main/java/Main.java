@@ -333,9 +333,17 @@ public class Main extends Application {
     // Update
     // ---------------------------------------------------------------
     private void update(long now, double delta) {
+
+        if (input.pausePressed){
+                input.pausePressed = false;
+                if (gameState == GameState.PLAYING) gameState = GameState.PAUSED;
+                else if (gameState == GameState.PAUSED) gameState = GameState.PLAYING;
+            }
+
         if (gameState == GameState.PLAYING) {
 
             // Player spawning
+        
             if (input.spawnSoldier && (now - lastSoldierSpawn) >= SOLDIER_COOLDOWN_NS) {
                 spawnUnit(true, "soldier");
                 lastSoldierSpawn = now;
@@ -348,6 +356,7 @@ public class Main extends Application {
                 spawnUnit(true, "knight");
                 lastKnightSpawn = now;
             }
+            
 
             // Enemy auto-spawning
             if ((now - lastEnemySpawn) >= ENEMY_COOLDOWN_NS) {
@@ -373,11 +382,12 @@ public class Main extends Application {
                     else            playerHealth--;
                     it.remove();
                 }
-                if (input.save) {
+            }
+            
+            if (input.save) {
                     saveGame();
                     input.save = false;
                 }
-            }
             // ...COLLISION...
             for (Unit u : units){
                 u.fighting = false;

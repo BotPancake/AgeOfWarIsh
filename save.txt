@@ -1,11 +1,4 @@
-<<<<<<< HEAD
 playerHealth=25
-enemyHealth=17
-playerScore=28
-enemyScore=24
-=======
-playerHealth=2
 enemyHealth=25
-playerScore=9
-enemyScore=6
->>>>>>> 6715cbbd21121315aa5e7296da9e30eef7bc72ab
+playerScore=0
+enemyScore=0

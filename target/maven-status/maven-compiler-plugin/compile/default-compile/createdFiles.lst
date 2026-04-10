@@ -1,7 +1,7 @@
 Main.class
 InputHandler.class
-Drawable.class
 Main$Unit.class
+Drawable.class
 Main$GameState.class
 Main$Soldier.class
 Main$Knight.class

@@ -6,12 +6,15 @@ public class InputHandler {
     public boolean spawnKnight  = false;
 
     public boolean save = false;
+    public boolean pausePressed = false;
 
     public void handleKeyPressed(KeyCode code) {
         if (code == KeyCode.Q) spawnSoldier = true;
         if (code == KeyCode.W) spawnArcher  = true;
         if (code == KeyCode.E) spawnKnight  = true;
         if (code == KeyCode.S) save         = true;
+        if (code == KeyCode.ESCAPE) pausePressed = true;
+
     }
 
     public void handleKeyReleased(KeyCode code) {
@@ -19,5 +22,6 @@ public class InputHandler {
         if (code == KeyCode.W) spawnArcher  = false;
         if (code == KeyCode.E) spawnKnight  = false;
         if (code == KeyCode.S) save         = false;
+        if (code == KeyCode.ESCAPE) pausePressed = false;
     }
 }
