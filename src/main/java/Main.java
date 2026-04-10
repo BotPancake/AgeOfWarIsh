@@ -107,7 +107,7 @@ public class Main extends Application {
     }
 
     // ---------------------------------------------------------------
-    // Soldier — fast, light unit
+    // Soldier — rask, lett tropp
     // ---------------------------------------------------------------
     static class Soldier extends Unit {
         Soldier(double x, double y, boolean isPlayer) {
@@ -155,7 +155,7 @@ public class Main extends Application {
     }
 
     // ---------------------------------------------------------------
-    // Knight — slow, bulky unit
+    // Knight — treg, bulky tropp
     // ---------------------------------------------------------------
     static class Knight extends Unit {
         Knight(double x, double y, boolean isPlayer) {
@@ -201,7 +201,7 @@ public class Main extends Application {
     }
 
     // ---------------------------------------------------------------
-    // Archer — medium speed unit
+    // Archer — medium fart, lett tropp
     // ---------------------------------------------------------------
     static class Archer extends Unit {
         Archer(double x, double y, boolean isPlayer) {
